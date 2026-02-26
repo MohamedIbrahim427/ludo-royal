@@ -14,64 +14,160 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.12) 0%,transparent 100%),radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,.08) 0%,transparent 100%),radial-gradient(1px 1px at 50% 70%,rgba(255,255,255,.1) 0%,transparent 100%),radial-gradient(1px 1px at 90% 60%,rgba(255,255,255,.08) 0%,transparent 100%);pointer-events:none;z-index:0;}
+body::before{content:'';position:fixed;inset:0;background-image:
+  radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.12) 0%,transparent 100%),
+  radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,.08) 0%,transparent 100%),
+  radial-gradient(1px 1px at 50% 70%,rgba(255,255,255,.1) 0%,transparent 100%),
+  radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.07) 0%,transparent 100%),
+  radial-gradient(1px 1px at 90% 60%,rgba(255,255,255,.08) 0%,transparent 100%);
+  pointer-events:none;z-index:0;}
 #app{position:relative;z-index:1;}
 
 .screen{display:none;min-height:100vh;}
 .screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
 
-/* ── MENU ── */
-#menu{background:radial-gradient(ellipse at 50% 20%,rgba(245,197,24,.08) 0%,transparent 60%);gap:36px;padding:40px 20px;}
-.logo h1{font-family:'Cinzel Decorative',serif;font-size:clamp(2.2rem,8vw,4.5rem);font-weight:900;background:linear-gradient(135deg,#f5c518,#ff8c00,#f5c518);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;line-height:1;}
-.logo p{font-size:.9rem;color:rgba(255,255,255,.4);letter-spacing:8px;text-transform:uppercase;margin-top:8px;text-align:center;}
-.crown{font-size:3rem;display:block;margin-bottom:8px;text-align:center;filter:drop-shadow(0 0 20px rgba(245,197,24,.6));animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+/* ══════════════════════════════
+   MENU SCREEN
+══════════════════════════════ */
+#menu{
+  background:radial-gradient(ellipse at 50% 10%,rgba(245,197,24,.1) 0%,transparent 55%);
+  padding:30px 20px;
+  gap:0;
+}
 
-.section-title{font-family:'Cinzel Decorative',serif;font-size:.85rem;color:rgba(255,255,255,.35);letter-spacing:4px;text-align:center;margin-bottom:20px;text-transform:uppercase;}
+/* Logo */
+.logo-wrap{text-align:center;margin-bottom:28px;}
+.crown-icon{font-size:2.8rem;display:block;filter:drop-shadow(0 0 18px rgba(245,197,24,.7));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.logo-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,8vw,3.5rem);font-weight:900;
+  background:linear-gradient(135deg,#f5c518,#ff8c00,#f5c518);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:4px;line-height:1;}
+.logo-sub{font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:8px;text-transform:uppercase;margin-top:6px;}
 
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:480px;width:100%;}
-.mode-btn{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 14px;cursor:pointer;transition:all .3s;text-align:center;position:relative;overflow:hidden;color:var(--text);}
-.mode-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,197,24,.08),transparent);opacity:0;transition:opacity .3s;}
-.mode-btn:hover{border-color:var(--gold);transform:translateY(-2px);}
-.mode-btn:hover::before{opacity:1;}
-.mode-btn .icon{font-size:2rem;display:block;margin-bottom:8px;}
-.mode-btn .title{font-size:1rem;font-weight:700;display:block;}
-.mode-btn .sub{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:4px;display:block;}
-.mode-btn.featured{grid-column:span 2;background:linear-gradient(135deg,rgba(245,197,24,.1),rgba(255,140,0,.05));border-color:rgba(245,197,24,.3);}
+/* Player slots */
+.slots-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
 
-.or-divider{display:flex;align-items:center;gap:16px;max-width:480px;width:100%;color:rgba(255,255,255,.2);font-size:.8rem;letter-spacing:3px;}
-.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.slot{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;transition:all .3s;}
+.slot.red  {border-left:4px solid var(--red);}
+.slot.blue {border-left:4px solid var(--blue);}
+.slot.green{border-left:4px solid var(--green);}
+.slot.yellow{border-left:4px solid var(--yellow);}
 
-.join-row{display:flex;gap:10px;max-width:480px;width:100%;}
-.join-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;outline:none;transition:border-color .2s;}
+.slot-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.slot.red    .slot-icon{background:rgba(230,57,70,.2);}
+.slot.blue   .slot-icon{background:rgba(29,119,212,.2);}
+.slot.green  .slot-icon{background:rgba(45,198,83,.2);}
+.slot.yellow .slot-icon{background:rgba(245,197,24,.2);}
+
+.slot-label{font-size:1rem;font-weight:700;flex:1;letter-spacing:1px;}
+.slot.red    .slot-label{color:var(--red);}
+.slot.blue   .slot-label{color:var(--blue);}
+.slot.green  .slot-label{color:var(--green);}
+.slot.yellow .slot-label{color:var(--yellow);}
+
+/* Toggle Human / CPU */
+.slot-toggle{display:flex;background:rgba(0,0,0,.3);border-radius:8px;padding:3px;gap:3px;}
+.tog-btn{padding:6px 14px;border:none;border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:rgba(255,255,255,.4);letter-spacing:1px;}
+.tog-btn.active{background:rgba(255,255,255,.15);color:white;}
+.slot.red    .tog-btn.active{background:rgba(230,57,70,.35);color:var(--red);}
+.slot.blue   .tog-btn.active{background:rgba(29,119,212,.35);color:var(--blue);}
+.slot.green  .tog-btn.active{background:rgba(45,198,83,.35);color:var(--green);}
+.slot.yellow .tog-btn.active{background:rgba(245,197,24,.35);color:var(--yellow);}
+
+/* Buttons row */
+.btn-row{width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;}
+
+.btn-start{
+  background:linear-gradient(135deg,var(--gold),#ff8c00);
+  color:#000;border:none;border-radius:14px;
+  padding:16px;font-family:'Rajdhani',sans-serif;
+  font-size:1.2rem;font-weight:900;cursor:pointer;
+  letter-spacing:3px;text-transform:uppercase;
+  transition:all .2s;box-shadow:0 4px 24px rgba(245,197,24,.35);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(245,197,24,.5);}
+
+.btn-quick{
+  background:var(--surface);
+  border:1px solid rgba(245,197,24,.3);
+  color:var(--gold);border-radius:14px;
+  padding:14px;font-family:'Rajdhani',sans-serif;
+  font-size:1.1rem;font-weight:700;cursor:pointer;
+  letter-spacing:3px;text-transform:uppercase;
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn-quick:hover{background:rgba(245,197,24,.08);border-color:var(--gold);transform:translateY(-2px);}
+
+.btn-join-code{
+  background:transparent;
+  border:1px solid var(--border);
+  color:rgba(255,255,255,.4);border-radius:14px;
+  padding:12px;font-family:'Rajdhani',sans-serif;
+  font-size:1rem;font-weight:600;cursor:pointer;
+  letter-spacing:2px;text-transform:uppercase;
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-join-code:hover{border-color:rgba(255,255,255,.3);color:var(--text);}
+
+/* Join code input row */
+.join-row{display:flex;gap:10px;width:100%;max-width:420px;}
+.join-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:13px 16px;color:var(--text);font-family:'Rajdhani',sans-serif;
+  font-size:1.1rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;outline:none;transition:border-color .2s;}
 .join-input:focus{border-color:var(--gold);}
-.join-input::placeholder{color:rgba(255,255,255,.2);letter-spacing:4px;}
-.btn-gold{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#000;border:none;border-radius:10px;padding:12px 24px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all .2s;box-shadow:0 4px 20px rgba(245,197,24,.25);}
-.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,197,24,.4);}
-.btn-gold:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.join-input::placeholder{color:rgba(255,255,255,.2);}
+.btn-gold-sm{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#000;border:none;border-radius:10px;
+  padding:13px 20px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:2px;transition:all .2s;}
+.btn-gold-sm:hover{transform:translateY(-1px);}
 
-/* ── LOBBY ── */
+#err-msg{color:#ff6b6b;font-size:.9rem;text-align:center;min-height:20px;margin-top:4px;}
+
+/* ══════════════════════════════
+   LOBBY SCREEN
+══════════════════════════════ */
 #lobby{gap:24px;padding:40px 20px;}
-.lobby-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:30px;max-width:500px;width:100%;text-align:center;}
-.room-code{font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:var(--gold);letter-spacing:8px;margin:16px 0;}
+.lobby-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:480px;width:100%;text-align:center;}
+.section-title{font-family:'Cinzel Decorative',serif;font-size:.8rem;color:rgba(255,255,255,.35);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;}
+.room-code{font-family:'Cinzel Decorative',serif;font-size:2.8rem;color:var(--gold);letter-spacing:10px;margin:12px 0;}
 .lobby-players{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
 .lobby-player{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;}
-.lobby-player .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+.lobby-player .ldot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
 .lobby-player .lname{font-weight:700;font-size:1rem;}
-.lobby-player .status{margin-left:auto;font-size:.75rem;color:rgba(255,255,255,.4);}
-.lobby-player.joined .status{color:var(--green);}
-.waiting-dots::after{content:'...';animation:dots 1.5s infinite;}
-@keyframes dots{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
-.btn-back{background:transparent;border:1px solid var(--border);color:rgba(255,255,255,.4);border-radius:8px;padding:8px 20px;font-family:'Rajdhani',sans-serif;font-size:.9rem;cursor:pointer;transition:all .2s;letter-spacing:2px;}
+.lobby-player .lstatus{margin-left:auto;font-size:.75rem;color:rgba(255,255,255,.35);}
+.lobby-player.joined .lstatus{color:var(--green);}
+.waiting-anim::after{content:'...';animation:wdots 1.5s infinite;}
+@keyframes wdots{0%{content:'.';}33%{content:'..';}66%{content:'...';}100%{content:'.'}}
+#lobby-status{color:rgba(255,255,255,.4);font-size:.9rem;min-height:24px;text-align:center;}
+.btn-back{background:transparent;border:1px solid var(--border);color:rgba(255,255,255,.4);border-radius:8px;
+  padding:8px 24px;font-family:'Rajdhani',sans-serif;font-size:.9rem;cursor:pointer;transition:all .2s;letter-spacing:2px;}
 .btn-back:hover{border-color:rgba(255,255,255,.3);color:var(--text);}
 
-/* ── GAME ── */
-#game{flex-direction:row;align-items:flex-start;justify-content:center;padding:20px;gap:20px;flex-wrap:wrap;}
+/* Matchmaking screen */
+#matchmaking{gap:28px;padding:40px 20px;text-align:center;}
+.mm-spinner{width:80px;height:80px;border:4px solid rgba(245,197,24,.1);border-top:4px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.mm-title{font-family:'Cinzel Decorative',serif;font-size:1.5rem;color:var(--gold);}
+.mm-sub{color:rgba(255,255,255,.4);font-size:1rem;letter-spacing:2px;}
+#mm-count{font-size:3rem;font-weight:900;color:var(--gold);font-family:'Cinzel Decorative',serif;}
+
+/* ══════════════════════════════
+   GAME SCREEN
+══════════════════════════════ */
+#game{flex-direction:row;align-items:flex-start;justify-content:center;padding:20px;gap:20px;flex-wrap:wrap;
+  background:radial-gradient(ellipse at 30% 50%,rgba(29,119,212,.04) 0%,transparent 50%),
+             radial-gradient(ellipse at 70% 50%,rgba(230,57,70,.04) 0%,transparent 50%);}
 
 /* Board */
 #board-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
-#board{width:min(580px,95vw);height:min(580px,95vw);display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);border:3px solid rgba(245,197,24,.3);border-radius:4px;background:#1a1a2e;box-shadow:0 0 60px rgba(245,197,24,.08),0 20px 60px rgba(0,0,0,.5);position:relative;}
-.cell{display:flex;align-items:center;justify-content:center;position:relative;border:.5px solid rgba(255,255,255,.04);font-size:.5rem;flex-wrap:wrap;}
+#board{width:min(560px,95vw);height:min(560px,95vw);display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);
+  border:3px solid rgba(245,197,24,.3);border-radius:4px;background:#1a1a2e;
+  box-shadow:0 0 60px rgba(245,197,24,.08),0 20px 60px rgba(0,0,0,.5);}
+.cell{display:flex;align-items:center;justify-content:center;position:relative;border:.5px solid rgba(255,255,255,.04);flex-wrap:wrap;}
 .home-red{background:rgba(230,57,70,.8);}
 .home-blue{background:rgba(29,119,212,.8);}
 .home-green{background:rgba(45,198,83,.8);}
@@ -83,10 +179,12 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .path-yellow{background:rgba(245,197,24,.18);}
 .safe-cell{background:rgba(255,255,255,.07);}
 .safe-cell::after{content:'★';font-size:.55rem;color:rgba(255,255,255,.25);position:absolute;}
-.home-slot{width:68%;height:68%;border-radius:50%;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.15);}
+.home-slot{width:66%;height:66%;border-radius:50%;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.15);}
 
 /* Tokens */
-.token{width:62%;height:62%;border-radius:50%;cursor:default;transition:all .25s;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:900;color:rgba(0,0,0,.75);position:relative;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 2px rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.3);}
+.token{width:60%;height:60%;border-radius:50%;cursor:default;transition:all .25s;display:flex;align-items:center;justify-content:center;
+  font-size:.58rem;font-weight:900;color:rgba(0,0,0,.75);position:relative;z-index:10;
+  box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 2px rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.3);}
 .token.red{background:radial-gradient(circle at 35% 35%,#ff7070,var(--red));}
 .token.blue{background:radial-gradient(circle at 35% 35%,#6eb8ff,var(--blue));}
 .token.green{background:radial-gradient(circle at 35% 35%,#7aff9a,var(--green));}
@@ -109,9 +207,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .mini-tok.done{border-color:gold;box-shadow:0 0 6px gold;}
 .turn-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:1.2rem;display:none;color:var(--pc);}
 .player-card.active .turn-arrow{display:block;}
-.player-card.you-card{border-style:dashed;}
 
-/* Dice area */
+/* Dice */
 .dice-area{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .dice-area h3{font-size:.75rem;letter-spacing:3px;color:rgba(255,255,255,.4);text-transform:uppercase;}
 #dice{width:68px;height:68px;background:white;border-radius:12px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:7px;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .1s;}
@@ -120,23 +217,24 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .ddot{display:flex;align-items:center;justify-content:center;}
 .ddot::after{content:'';width:9px;height:9px;background:#222;border-radius:50%;display:none;}
 .ddot.on::after{display:block;}
-#roll-btn{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#000;border:none;border-radius:10px;padding:11px 26px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all .2s;box-shadow:0 4px 18px rgba(245,197,24,.3);}
+#roll-btn{background:linear-gradient(135deg,var(--gold),#ff8c00);color:#000;border:none;border-radius:10px;
+  padding:11px 26px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:2px;text-transform:uppercase;transition:all .2s;box-shadow:0 4px 18px rgba(245,197,24,.3);}
 #roll-btn:hover{transform:translateY(-2px);}
 #roll-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
 #status{text-align:center;font-size:.95rem;color:rgba(255,255,255,.55);font-weight:600;letter-spacing:1px;min-height:22px;}
-.my-turn-badge{background:linear-gradient(135deg,rgba(245,197,24,.15),rgba(255,140,0,.08));border:1px solid rgba(245,197,24,.3);border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;letter-spacing:2px;color:var(--gold);text-align:center;}
 
-/* Win */
+/* Win screen */
 #win-screen{background:radial-gradient(ellipse at 50% 30%,rgba(245,197,24,.15),transparent 60%);gap:28px;padding:40px;text-align:center;}
 #win-screen h1{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,6vw,3.5rem);background:linear-gradient(135deg,#f5c518,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 #winner-name{font-size:2rem;font-weight:700;margin-top:8px;}
 
-/* Notif */
-#notif{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(20,20,40,.95);border:1px solid rgba(245,197,24,.4);border-radius:10px;padding:11px 26px;font-size:1rem;font-weight:600;transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:1000;white-space:nowrap;pointer-events:none;}
+/* Notification */
+#notif{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:rgba(20,20,40,.95);border:1px solid rgba(245,197,24,.4);border-radius:10px;
+  padding:11px 26px;font-size:1rem;font-weight:600;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:1000;white-space:nowrap;pointer-events:none;}
 #notif.show{transform:translateX(-50%) translateY(0);}
-
-/* Error */
-#err-msg{color:#ff6b6b;font-size:.9rem;text-align:center;min-height:20px;}
 
 @media(max-width:700px){
   #game{flex-direction:column;align-items:center;}
@@ -149,64 +247,91 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 <body>
 <div id="app">
 
-<!-- MENU -->
+<!-- ══ MENU ══ -->
 <div id="menu" class="screen active">
-  <div class="logo">
-    <span class="crown">♛</span>
-    <h1>LUDO ROYAL</h1>
-    <p>Online Multiplayer Server</p>
+  <div class="logo-wrap">
+    <span class="crown-icon">♛</span>
+    <h1 class="logo-title">LUDO ROYAL</h1>
+    <p class="logo-sub">Online Multiplayer</p>
   </div>
 
-  <div style="width:100%;max-width:480px;">
-    <p class="section-title">Create a Game</p>
-    <div class="mode-grid">
-      <button class="mode-btn featured" onclick="createRoom('4p')">
-        <span class="icon">👑</span>
-        <span class="title">4 PLAYERS</span>
-        <span class="sub">All Human – Share Room Code</span>
-      </button>
-      <button class="mode-btn" onclick="createRoom('1v3')">
-        <span class="icon">🎮</span>
-        <span class="title">1 vs 3 CPU</span>
-        <span class="sub">Solo vs 3 Robots</span>
-      </button>
-      <button class="mode-btn" onclick="createRoom('2v2')">
-        <span class="icon">⚔️</span>
-        <span class="title">2 vs 2 CPU</span>
-        <span class="sub">2 Human + 2 CPU</span>
-      </button>
-      <button class="mode-btn" onclick="createRoom('3v1')">
-        <span class="icon">🤖</span>
-        <span class="title">3 vs 1 CPU</span>
-        <span class="sub">3 Human + 1 CPU</span>
-      </button>
+  <!-- Player slots -->
+  <div class="slots-wrap">
+    <div class="slot red" id="slot-0">
+      <div class="slot-icon">♟</div>
+      <span class="slot-label">PLAYER 1</span>
+      <div class="slot-toggle">
+        <button class="tog-btn active" onclick="setSlot(0,'human',this)">👤 YOU</button>
+        <button class="tog-btn" onclick="setSlot(0,'cpu',this)">🤖 CPU</button>
+      </div>
+    </div>
+    <div class="slot blue" id="slot-1">
+      <div class="slot-icon">♟</div>
+      <span class="slot-label">PLAYER 2</span>
+      <div class="slot-toggle">
+        <button class="tog-btn active" onclick="setSlot(1,'human',this)">👤 YOU</button>
+        <button class="tog-btn" onclick="setSlot(1,'cpu',this)">🤖 CPU</button>
+      </div>
+    </div>
+    <div class="slot green" id="slot-2">
+      <div class="slot-icon">♟</div>
+      <span class="slot-label">PLAYER 3</span>
+      <div class="slot-toggle">
+        <button class="tog-btn" onclick="setSlot(2,'human',this)">👤 YOU</button>
+        <button class="tog-btn active" onclick="setSlot(2,'cpu',this)">🤖 CPU</button>
+      </div>
+    </div>
+    <div class="slot yellow" id="slot-3">
+      <div class="slot-icon">♟</div>
+      <span class="slot-label">PLAYER 4</span>
+      <div class="slot-toggle">
+        <button class="tog-btn" onclick="setSlot(3,'human',this)">👤 YOU</button>
+        <button class="tog-btn active" onclick="setSlot(3,'cpu',this)">🤖 CPU</button>
+      </div>
     </div>
   </div>
 
-  <div class="or-divider">OR JOIN EXISTING</div>
-
-  <div class="join-row" style="max-width:480px;width:100%;">
-    <input class="join-input" id="room-input" placeholder="ROOM CODE" maxlength="8">
-    <button class="btn-gold" onclick="joinRoom()">JOIN →</button>
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="btn-start" onclick="startCustomGame()">
+      ♛ START GAME
+    </button>
+    <button class="btn-quick" onclick="quickJoin()">
+      ⚡ QUICK JOIN — Random Match
+    </button>
+    <button class="btn-join-code" onclick="toggleJoinRow()">
+      🔑 JOIN WITH ROOM CODE
+    </button>
+    <div class="join-row" id="join-row" style="display:none;">
+      <input class="join-input" id="room-input" placeholder="ENTER CODE" maxlength="8">
+      <button class="btn-gold-sm" onclick="joinByCode()">JOIN</button>
+    </div>
+    <div id="err-msg"></div>
   </div>
-  <div id="err-msg"></div>
 </div>
 
-<!-- LOBBY -->
+<!-- ══ MATCHMAKING ══ -->
+<div id="matchmaking" class="screen">
+  <div class="mm-spinner"></div>
+  <div class="mm-title">Finding a Match...</div>
+  <div id="mm-count">0/4</div>
+  <div class="mm-sub">PLAYERS CONNECTED</div>
+  <button class="btn-back" style="margin-top:10px;" onclick="cancelMatchmaking()">CANCEL</button>
+</div>
+
+<!-- ══ LOBBY ══ -->
 <div id="lobby" class="screen">
   <div class="lobby-box">
     <p class="section-title">Room Code</p>
     <div class="room-code" id="lobby-code">------</div>
-    <p style="color:rgba(255,255,255,.3);font-size:.85rem;letter-spacing:2px;">Share this code with friends</p>
-
+    <p style="color:rgba(255,255,255,.3);font-size:.85rem;letter-spacing:2px;">Share with friends</p>
     <div class="lobby-players" id="lobby-players"></div>
-
-    <div id="lobby-status" style="color:rgba(255,255,255,.4);font-size:.9rem;min-height:24px;text-align:center;"></div>
+    <div id="lobby-status"></div>
   </div>
   <button class="btn-back" onclick="leaveToMenu()">← Back</button>
 </div>
 
-<!-- GAME -->
+<!-- ══ GAME ══ -->
 <div id="game" class="screen">
   <div id="board-wrap">
     <div id="board"></div>
@@ -227,19 +352,21 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   </div>
 </div>
 
-<!-- WIN -->
+<!-- ══ WIN ══ -->
 <div id="win-screen" class="screen">
-  <span class="crown" style="font-size:5rem;">♛</span>
+  <span class="crown-icon" style="font-size:5rem;">♛</span>
   <h1>WINNER!</h1>
   <div id="winner-name"></div>
-  <button class="btn-gold" style="margin-top:20px;padding:14px 48px;font-size:1.1rem;" onclick="leaveToMenu()">PLAY AGAIN</button>
+  <button class="btn-start" style="margin-top:20px;max-width:300px;" onclick="leaveToMenu()">PLAY AGAIN</button>
 </div>
 
 </div>
 <div id="notif"></div>
 
 <script>
-// ── CONSTANTS ──
+// ══════════════════════════════
+// CONSTANTS
+// ══════════════════════════════
 const COLORS    = ['red','blue','green','yellow'];
 const COLOR_HEX = {red:'#e63946',blue:'#1d77d4',green:'#2dc653',yellow:'#f5c518'};
 const COLOR_RGB = {red:[230,57,70],blue:[29,119,212],green:[45,198,83],yellow:[245,197,24]};
@@ -265,23 +392,91 @@ const HOME_POS = {
   green: [[12,1],[12,2],[13,1],[13,2]],
   yellow:[[12,12],[12,13],[13,12],[13,13]],
 };
-const SAFE_IDX = new Set([0,8,13,21,26,34,39,47]);
-
-const DICE_DOTS = {
+const HOME_ENTRY = {red:51,blue:11,green:37,yellow:24};
+const SAFE_IDX   = new Set([0,8,13,21,26,34,39,47]);
+const DICE_DOTS  = {
   1:[0,0,0,0,1,0,0,0,0],2:[1,0,0,0,0,0,0,0,1],3:[1,0,0,0,1,0,0,0,1],
   4:[1,0,1,0,0,0,1,0,1],5:[1,0,1,0,1,0,1,0,1],6:[1,0,1,1,0,1,1,0,1],
 };
 
-// ── SOCKET ──
-const socket = io();
-let myPlayerIdx = null;
-let myRoomId    = null;
-let gameState   = null;
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+const socket      = io();
+let myPlayerIdx   = null;
+let myRoomId      = null;
+let gameState     = null;
+let slotTypes     = ['human','human','cpu','cpu']; // default
+let inMatchmaking = false;
 
+// ══════════════════════════════
+// MENU LOGIC
+// ══════════════════════════════
+function setSlot(idx, type, btn) {
+  slotTypes[idx] = type;
+  const toggle = btn.parentElement;
+  toggle.querySelectorAll('.tog-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update icon
+  const icon = document.querySelector(`#slot-${idx} .slot-icon`);
+  icon.textContent = type === 'cpu' ? '🤖' : '♟';
+}
+
+function toggleJoinRow() {
+  const row = document.getElementById('join-row');
+  row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+}
+
+function startCustomGame() {
+  setErr('');
+  // Build mode string from slot types
+  const humanCount = slotTypes.filter(t => t === 'human').length;
+  const cpuCount   = slotTypes.filter(t => t === 'cpu').length;
+  if(humanCount === 0) { setErr('At least 1 human player required!'); return; }
+
+  let mode;
+  if(cpuCount === 0)      mode = '4p';
+  else if(humanCount === 1) mode = '1v3';
+  else if(humanCount === 2) mode = '2v2';
+  else if(humanCount === 3) mode = '3v1';
+  else                      mode = '4p';
+
+  socket.emit('create_room', {mode});
+  showScreen('lobby');
+}
+
+function quickJoin() {
+  setErr('');
+  inMatchmaking = true;
+  socket.emit('quick_join', {});
+  showScreen('matchmaking');
+}
+
+function cancelMatchmaking() {
+  inMatchmaking = false;
+  socket.emit('cancel_matchmaking', {});
+  showScreen('menu');
+}
+
+function joinByCode() {
+  const code = document.getElementById('room-input').value.toUpperCase().trim();
+  if(!code) { setErr('Enter a room code!'); return; }
+  setErr('');
+  socket.emit('join_room', {room_id: code});
+}
+
+// ══════════════════════════════
+// SOCKET EVENTS
+// ══════════════════════════════
 socket.on('joined', d => {
   myPlayerIdx = d.player_idx;
   myRoomId    = d.room_id;
+  inMatchmaking = false;
   setErr('');
+});
+
+socket.on('matchmaking_count', d => {
+  document.getElementById('mm-count').textContent = `${d.count}/4`;
 });
 
 socket.on('game_state', state => {
@@ -291,61 +486,41 @@ socket.on('game_state', state => {
     showScreen('lobby');
     return;
   }
-  if(state.game_over) {
-    handleWin(state);
-    return;
-  }
+  if(state.game_over) { handleWin(state); return; }
   renderGame(state, state.events || []);
   showScreen('game');
 });
 
 socket.on('notification', d => showNotif(d.msg));
-socket.on('error', d => setErr(d.msg));
+socket.on('error', d => { setErr(d.msg); if(inMatchmaking) showScreen('menu'); });
 
-// ── MENU ACTIONS ──
-function createRoom(mode) {
-  setErr('');
-  socket.emit('create_room', {mode});
-  showScreen('lobby');
-}
-
-function joinRoom() {
-  const code = document.getElementById('room-input').value.toUpperCase().trim();
-  if(!code){setErr('Enter a room code!');return;}
-  setErr('');
-  socket.emit('join_room', {room_id: code});
-}
-
-function leaveToMenu() {
-  myPlayerIdx = null; myRoomId = null; gameState = null;
-  showScreen('menu');
-  showDice(1);
-}
-
-// ── LOBBY ──
+// ══════════════════════════════
+// LOBBY
+// ══════════════════════════════
 function renderLobby(state) {
   document.getElementById('lobby-code').textContent = state.room_id;
   const list = document.getElementById('lobby-players');
   list.innerHTML = '';
   state.players.forEach((p, i) => {
-    const div = document.createElement('div');
     const joined = state.filled_slots.includes(i);
+    const div = document.createElement('div');
     div.className = 'lobby-player' + (joined ? ' joined' : '');
     div.innerHTML = `
-      <div class="dot" style="background:${COLOR_HEX[p.color]}"></div>
-      <span class="lname">${p.name.replace('🤖','').replace('👤','').trim()}</span>
-      <span class="status">${p.is_cpu ? '🤖 CPU' : (joined ? '✓ Connected' : 'Waiting…')}</span>
+      <div class="ldot" style="background:${COLOR_HEX[p.color]}"></div>
+      <span class="lname">${p.color.charAt(0).toUpperCase()+p.color.slice(1)}</span>
+      <span class="lstatus">${p.is_cpu ? '🤖 CPU' : joined ? '✓ Connected' : 'Waiting…'}</span>
     `;
     list.appendChild(div);
   });
-
   const remaining = state.human_slots.filter(s => !state.filled_slots.includes(s)).length;
   document.getElementById('lobby-status').innerHTML = remaining > 0
-    ? `Waiting for <b>${remaining}</b> more player(s) <span class="waiting-dots"></span>`
-    : 'All players ready! Starting…';
+    ? `Waiting for <b>${remaining}</b> more player(s) <span class="waiting-anim"></span>`
+    : '✅ All players ready! Starting…';
 }
 
-// ── BOARD BUILD ──
+// ══════════════════════════════
+// BOARD BUILD
+// ══════════════════════════════
 let boardBuilt = false;
 function buildBoard() {
   if(boardBuilt) return;
@@ -359,47 +534,41 @@ function buildBoard() {
     board.appendChild(cell);
   }
   // Home zones
-  const zones = [{r1:0,c1:0,r2:6,c2:6,cls:'home-red'},{r1:0,c1:9,r2:6,c2:15,cls:'home-blue'},
-                 {r1:9,c1:0,r2:15,c2:6,cls:'home-green'},{r1:9,c1:9,r2:15,c2:15,cls:'home-yellow'}];
-  zones.forEach(z => {
-    for(let r=z.r1;r<z.r2;r++) for(let c=z.c1;c<z.c2;c++) {
-      if(!isSpecial(r,c)) document.getElementById(`c${r}-${c}`).className = `cell ${z.cls}`;
-    }
+  [{r1:0,c1:0,r2:6,c2:6,cls:'home-red'},{r1:0,c1:9,r2:6,c2:15,cls:'home-blue'},
+   {r1:9,c1:0,r2:15,c2:6,cls:'home-green'},{r1:9,c1:9,r2:15,c2:15,cls:'home-yellow'}]
+  .forEach(z => {
+    for(let r=z.r1;r<z.r2;r++) for(let c=z.c1;c<z.c2;c++)
+      if(!isSpecial(r,c)) document.getElementById(`c${r}-${c}`).className=`cell ${z.cls}`;
   });
   // Home slots
-  Object.entries(HOME_POS).forEach(([col, slots]) => {
+  Object.entries(HOME_POS).forEach(([col,slots]) => {
     slots.forEach(([r,c]) => {
       const cell = document.getElementById(`c${r}-${c}`);
-      cell.className = `cell home-${col}`;
-      const slot = document.createElement('div');
-      slot.className = 'home-slot';
-      slot.id = `hs-${col}-${r}-${c}`;
-      cell.appendChild(slot);
+      cell.className=`cell home-${col}`;
+      const s=document.createElement('div'); s.className='home-slot'; cell.appendChild(s);
     });
   });
   // Path
   PATH.forEach(([r,c],i) => {
     const cell = document.getElementById(`c${r}-${c}`);
-    if(SAFE_IDX.has(i)) { cell.className='cell safe-cell'; }
-    else { cell.className='cell path'; }
+    cell.className = SAFE_IDX.has(i) ? 'cell safe-cell' : 'cell path';
   });
-  // Colored safe starters
-  const colorSafe = {0:'red',13:'blue',26:'green',39:'yellow'};
-  Object.entries(colorSafe).forEach(([i,col]) => {
-    const [r,c] = PATH[i];
-    const cell = document.getElementById(`c${r}-${c}`);
-    cell.className = `cell safe-cell`;
-    cell.style.background = `rgba(${COLOR_RGB[col].join(',')},0.35)`;
+  // Color-coded safe starts
+  [{i:0,col:'red'},{i:13,col:'blue'},{i:26,col:'green'},{i:39,col:'yellow'}].forEach(({i,col}) => {
+    const [r,c]=PATH[i];
+    const cell=document.getElementById(`c${r}-${c}`);
+    cell.className='cell safe-cell';
+    cell.style.background=`rgba(${COLOR_RGB[col].join(',')},0.35)`;
   });
   // Home stretches
   Object.entries(HOME_STRETCH).forEach(([col,cells]) => {
     cells.forEach(([r,c]) => { document.getElementById(`c${r}-${c}`).className=`cell path-${col}`; });
   });
-  // Center star
+  // Center
   for(let r=6;r<=8;r++) for(let c=6;c<=8;c++) {
-    const cell = document.getElementById(`c${r}-${c}`);
+    const cell=document.getElementById(`c${r}-${c}`);
     cell.className='cell';
-    cell.style.background = r===7&&c===7 ? 'rgba(245,197,24,.12)' : 'transparent';
+    cell.style.background=r===7&&c===7?'rgba(245,197,24,.12)':'transparent';
     if(r===7&&c===7) cell.innerHTML='<span style="font-size:1.4rem;position:absolute;">⭐</span>';
   }
 }
@@ -407,33 +576,33 @@ function buildBoard() {
 function isSpecial(r,c) {
   if(r>=6&&r<=8&&c>=6&&c<=8) return true;
   if(PATH.some(p=>p[0]===r&&p[1]===c)) return true;
-  return Object.values(HOME_STRETCH).some(hs=>hs.some(p=>p[0]===r&&p[1]===c)) ||
+  return Object.values(HOME_STRETCH).some(hs=>hs.some(p=>p[0]===r&&p[1]===c))||
          Object.values(HOME_POS).some(hs=>hs.some(p=>p[0]===r&&p[1]===c));
 }
 
-// ── RENDER GAME ──
+// ══════════════════════════════
+// RENDER GAME
+// ══════════════════════════════
 function renderGame(state, events) {
   buildBoard();
   renderPlayers(state);
   renderTokens(state);
-  updateDiceUI(state);
-  handleEvents(events, state);
+  if(state.dice_value > 0) showDice(state.dice_value);
+  if(events.length) handleEvents(events);
 }
 
 function renderPlayers(state) {
   const list = document.getElementById('players-list');
   list.innerHTML = '';
   state.players.forEach((p,i) => {
-    const isMe = i === myPlayerIdx;
+    const isMe   = i === myPlayerIdx;
     const active = i === state.current_player;
     const [pr,pg,pb] = COLOR_RGB[p.color];
     const card = document.createElement('div');
-    card.className = `player-card${active?' active':''}${isMe?' you-card':''}`;
+    card.className = `player-card${active?' active':''}`;
     card.style.cssText = `--pc:${COLOR_HEX[p.color]};--pr:${pr};--pg:${pg};--pb:${pb};`;
     const toks = p.tokens.map(t => {
-      let cls = 'mini-tok';
-      if(t.pos===-1) cls += ' home';
-      if(t.finished) cls += ' done';
+      let cls = 'mini-tok' + (t.pos===-1?' home':'') + (t.finished?' done':'');
       return `<div class="${cls}" style="background:${COLOR_HEX[p.color]}"></div>`;
     }).join('');
     card.innerHTML = `
@@ -448,55 +617,35 @@ function renderPlayers(state) {
     list.appendChild(card);
   });
 
-  const isMyCPU = state.current_player === myPlayerIdx && !state.players[state.current_player].is_cpu;
-  const rollBtn = document.getElementById('roll-btn');
-  rollBtn.disabled = !(isMyCPU && !state.rolled);
-
   const cp = state.players[state.current_player];
   const isMyTurn = state.current_player === myPlayerIdx && !cp.is_cpu;
+  const rollBtn  = document.getElementById('roll-btn');
+  rollBtn.disabled = !(isMyTurn && !state.rolled);
+
   const statusEl = document.getElementById('status');
-  if(isMyTurn && !state.rolled) {
-    statusEl.innerHTML = `<span style="color:var(--gold)">⭐ YOUR TURN – Roll!</span>`;
-  } else if(isMyTurn && state.rolled) {
-    statusEl.innerHTML = `<span style="color:var(--gold)">Pick a token to move</span>`;
-  } else {
-    statusEl.textContent = `${cp.name.replace('🤖','').replace('👤','').trim()}'s turn`;
-  }
+  if(isMyTurn && !state.rolled)       statusEl.innerHTML = `<span style="color:var(--gold)">⭐ YOUR TURN – Roll!</span>`;
+  else if(isMyTurn && state.rolled)   statusEl.innerHTML = `<span style="color:var(--gold)">Pick a token!</span>`;
+  else statusEl.textContent = `${cp.color.charAt(0).toUpperCase()+cp.color.slice(1)}'s turn`;
 }
 
 function renderTokens(state) {
-  document.querySelectorAll('.token').forEach(t => t.remove());
-  state.players.forEach((player, pi) => {
-    player.tokens.forEach((token, ti) => {
+  document.querySelectorAll('.token').forEach(t=>t.remove());
+  state.players.forEach((player,pi) => {
+    player.tokens.forEach((token,ti) => {
       if(token.finished) return;
       let cell;
-      if(token.pos === -1) {
-        const [r,c] = HOME_POS[player.color][ti];
-        cell = document.getElementById(`c${r}-${c}`);
-      } else if(token.stretch >= 0) {
-        const [r,c] = HOME_STRETCH[player.color][token.stretch];
-        cell = document.getElementById(`c${r}-${c}`);
-      } else {
-        const [r,c] = PATH[token.pos];
-        cell = document.getElementById(`c${r}-${c}`);
-      }
+      if(token.pos===-1)       { const[r,c]=HOME_POS[player.color][ti]; cell=document.getElementById(`c${r}-${c}`); }
+      else if(token.stretch>=0){ const[r,c]=HOME_STRETCH[player.color][token.stretch]; cell=document.getElementById(`c${r}-${c}`); }
+      else                     { const[r,c]=PATH[token.pos]; cell=document.getElementById(`c${r}-${c}`); }
       if(!cell) return;
-
-      const el = document.createElement('div');
-      el.className = `token ${player.color}`;
-      el.textContent = ti+1;
-      el.dataset.pi = pi;
-      el.dataset.ti = ti;
-
-      const isMovable = pi === myPlayerIdx &&
-                        pi === state.current_player &&
-                        state.rolled &&
-                        !state.players[pi].is_cpu &&
-                        clientCanMove(token, state.dice_value, player.color);
-
-      if(isMovable) {
+      const el=document.createElement('div');
+      el.className=`token ${player.color}`;
+      el.textContent=ti+1;
+      const movable = pi===myPlayerIdx && pi===state.current_player && state.rolled &&
+                      !state.players[pi].is_cpu && clientCanMove(token,state.dice_value,player.color);
+      if(movable) {
         el.classList.add('movable');
-        el.onclick = () => { el.classList.add('selected'); socket.emit('move_token', {token_id: ti}); };
+        el.onclick=()=>{ el.classList.add('selected'); socket.emit('move_token',{token_id:ti}); };
       }
       cell.appendChild(el);
     });
@@ -505,24 +654,17 @@ function renderTokens(state) {
 
 function clientCanMove(token, dice, color) {
   if(token.finished) return false;
-  if(token.pos === -1) return dice === 6;
-  if(token.stretch >= 0) return token.stretch + dice <= 5;
-  const HOME_ENTRY = {red:51,blue:11,green:37,yellow:24};
-  const entry = HOME_ENTRY[color];
-  const dist = ((entry - token.pos + 52) % 52) || 52;
-  if(dice <= dist) return true;
-  return (dice - dist - 1) <= 5;
+  if(token.pos===-1) return dice===6;
+  if(token.stretch>=0) return token.stretch+dice<=5;
+  const entry=HOME_ENTRY[color];
+  const dist=((entry-token.pos+52)%52)||52;
+  return dice<=dist || (dice-dist-1)<=5;
 }
 
-function updateDiceUI(state) {
-  if(state.dice_value > 0) showDice(state.dice_value);
-}
-
-function handleEvents(events, state) {
-  if(!events || !events.length) return;
+function handleEvents(events) {
   events.forEach(e => {
-    if(e.type === 'capture')  showNotif(`${e.by.toUpperCase()} captured ${e.victim.toUpperCase()}! 💀`);
-    if(e.type === 'home')     showNotif(`${e.color.toUpperCase()} token reached home! ★`);
+    if(e.type==='capture') showNotif(`${e.by.toUpperCase()} captured ${e.victim.toUpperCase()}! 💀`);
+    if(e.type==='home')    showNotif(`${e.color.toUpperCase()} token home! ★`);
   });
 }
 
@@ -533,49 +675,43 @@ function handleWin(state) {
   showScreen('win-screen');
 }
 
-// ── DICE ──
+// ══════════════════════════════
+// DICE
+// ══════════════════════════════
 function showDice(val) {
-  const d = DICE_DOTS[val];
-  for(let i=1;i<=9;i++) {
-    const el = document.getElementById(`d${i}`);
-    el.className = 'ddot' + (d[i-1] ? ' on' : '');
-  }
+  const d=DICE_DOTS[val];
+  for(let i=1;i<=9;i++) document.getElementById(`d${i}`).className='ddot'+(d[i-1]?' on':'');
 }
 
 function rollDice() {
-  if(!gameState || gameState.current_player !== myPlayerIdx) return;
-  socket.emit('roll_dice', {});
-  // Local animation
-  const dice = document.getElementById('dice');
+  if(!gameState || gameState.current_player!==myPlayerIdx) return;
+  socket.emit('roll_dice',{});
+  const dice=document.getElementById('dice');
   dice.classList.add('rolling');
   let c=0;
-  const iv = setInterval(() => {
-    showDice(Math.ceil(Math.random()*6));
-    if(++c>6){ clearInterval(iv); dice.classList.remove('rolling'); }
-  },60);
+  const iv=setInterval(()=>{ showDice(Math.ceil(Math.random()*6)); if(++c>6){clearInterval(iv);dice.classList.remove('rolling');}},60);
 }
 
-// ── UTILS ──
+// ══════════════════════════════
+// UTILS
+// ══════════════════════════════
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-function setErr(msg) { document.getElementById('err-msg').textContent = msg; }
+function setErr(msg) { document.getElementById('err-msg').textContent=msg; }
+function leaveToMenu() { myPlayerIdx=null; myRoomId=null; gameState=null; boardBuilt=false; showScreen('menu'); showDice(1); }
 
 let notifTimer;
 function showNotif(msg) {
-  const el = document.getElementById('notif');
-  el.textContent = msg; el.classList.add('show');
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.classList.add('show');
   clearTimeout(notifTimer);
-  notifTimer = setTimeout(()=>el.classList.remove('show'), 2600);
+  notifTimer=setTimeout(()=>el.classList.remove('show'),2600);
 }
 
-// Init
+document.getElementById('room-input').addEventListener('keydown', e=>{ if(e.key==='Enter') joinByCode(); });
 showDice(1);
-document.getElementById('room-input').addEventListener('keydown', e => {
-  if(e.key === 'Enter') joinRoom();
-});
 </script>
 </body>
 </html>

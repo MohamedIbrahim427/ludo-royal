@@ -181,8 +181,9 @@ def cpu_choose_token(game, player_idx):
 # ROOMS / LOBBY
 # ─────────────────────────────────────────────
 
-rooms  = {}   # room_id -> game state
-players = {}  # sid -> {room_id, player_idx}
+rooms      = {}   # room_id -> game state
+players    = {}   # sid -> {room_id, player_idx}
+mm_queue   = []   # list of sids waiting for matchmaking
 
 
 def create_room(mode):
@@ -305,6 +306,8 @@ def on_connect():
 @socketio.on('disconnect')
 def on_disconnect():
     sid = request.sid
+    if sid in mm_queue:
+        mm_queue.remove(sid)
     info = players.pop(sid, None)
     if info:
         room_id = info['room_id']
@@ -446,6 +449,41 @@ def on_move_token(data):
 
     broadcast_state(room_id, events)
     advance_turn(room_id, game['dice_value'] != 6)
+
+
+@socketio.on('quick_join')
+def on_quick_join(data):
+    sid = request.sid
+    if sid in mm_queue:
+        return
+    mm_queue.append(sid)
+    # Broadcast count to all in queue
+    for s in mm_queue:
+        socketio.emit('matchmaking_count', {'count': len(mm_queue)}, to=s)
+    # If 4 players in queue, start a game
+    if len(mm_queue) >= 4:
+        four = mm_queue[:4]
+        del mm_queue[:4]
+        room_id = create_room('4p')
+        game = rooms[room_id]
+        # Override all slots as human
+        game['human_slots'] = [0, 1, 2, 3]
+        for i, s in enumerate(four):
+            game['players'][i]['is_cpu'] = False
+            game['players'][i]['sid'] = s
+            game['filled_slots'].append(i)
+            players[s] = {'room_id': room_id, 'player_idx': i}
+            join_room(room_id, sid=s)
+            socketio.emit('joined', {'room_id': room_id, 'player_idx': i, 'color': COLORS[i]}, to=s)
+        game['started'] = True
+        broadcast_state(room_id)
+
+
+@socketio.on('cancel_matchmaking')
+def on_cancel_matchmaking(data):
+    sid = request.sid
+    if sid in mm_queue:
+        mm_queue.remove(sid)
 
 
 # ─────────────────────────────────────────────
