@@ -552,11 +552,19 @@ function renderTokens(state){
 }
 
 function canMove(tok,dice,color){
-  if(tok.finished)return false;
-  if(tok.pos===-1)return dice===6;
-  if(tok.stretch>=0)return tok.stretch+dice<=5;
-  const entry=HE[color];const dist=((entry-tok.pos+52)%52)||52;
-  return dice<=dist||(dice-dist-1)<=5;
+  if(tok.finished) return false;
+  // At home base: only 6 brings token out
+  if(tok.pos===-1) return dice===6;
+  // In home stretch: cannot overshoot position 5
+  if(tok.stretch>=0) return tok.stretch+dice<=5;
+  // On outer path: check steps to entry
+  const entry=HE[color];
+  let stepsToEntry=(entry-tok.pos+52)%52;
+  if(stepsToEntry===0) stepsToEntry=52;
+  if(dice<=stepsToEntry) return true;
+  // Would enter home stretch
+  const stepsInto=dice-stepsToEntry-1;
+  return stepsInto<=5;
 }
 
 function doWin(state){
