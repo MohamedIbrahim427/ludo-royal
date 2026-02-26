@@ -91,38 +91,31 @@ def make_player(color, is_cpu):
 # CORE LOGIC: can a token move with this dice?
 # ─────────────────────────────────────────────
 def can_move(token, dice, color):
+    # RULE: only dice=6 allows moving any token
+    if dice != 6:
+        return False
     if token['finished']:
         return False
 
-    # Token at home base: only 6 can bring it out
+    # Token at home base: 6 brings it out
     if token['pos'] == -1:
-        return dice == 6
+        return True
 
-    # Token in home stretch: can only move if it doesn't overshoot
-    # stretch 0..5, needs to reach exactly 5 or land on 0-5
+    # Token in home stretch: move 6 steps, can't overshoot position 5
     if token['stretch'] >= 0:
         new_stretch = token['stretch'] + dice
-        return new_stretch <= 5   # can't overshoot the home
+        return new_stretch <= 5
 
-    # Token on outer path
-    # Calculate steps from current pos to the entry point before home
+    # Token on outer path: move 6 steps
+    # Check it won't overshoot home stretch
     entry = ENTRY_BEFORE_HOME[color]
-    start = START_IDX[color]
-
-    # How many steps until we reach the entry cell
     steps_to_entry = (entry - token['pos']) % 52
     if steps_to_entry == 0:
-        steps_to_entry = 52  # already AT entry, need a full lap
-
+        steps_to_entry = 52
     if dice <= steps_to_entry:
-        # Stays on outer path (or lands exactly on entry cell)
         return True
-    else:
-        # Would enter home stretch
-        # steps_into_stretch = dice - steps_to_entry - 1
-        # (the -1 is because after entry cell, home stretch starts at index 0)
-        steps_into_stretch = dice - steps_to_entry - 1
-        return steps_into_stretch <= 5  # can't overshoot
+    steps_into_stretch = dice - steps_to_entry - 1
+    return steps_into_stretch <= 5
 
 
 # ─────────────────────────────────────────────
@@ -333,10 +326,10 @@ def start_cpu_turn(room_id, delay=1.2):
 
         if not movable:
             socketio.emit('notification',
-                {'msg': f"{color.upper()} has no moves! Skipping..."},
+                {'msg': f"{color.upper()} rolled {val} — needs 6 to move!"},
                 room=room_id)
             time.sleep(1.0)
-            next_turn(room_id, advance=val != 6)
+            next_turn(room_id, advance=True)  # always advance if no moves
             return
 
         time.sleep(0.8)
@@ -468,10 +461,10 @@ def on_roll_dice(data):
 
     if not movable:
         socketio.emit('notification',
-            {'msg': f"No moves available! Rolled {val}"},
+            {'msg': f"Rolled {val} — need a 6 to move! Next player..."},
             room=info['room_id'])
         time.sleep(0.8)
-        next_turn(info['room_id'], advance=val != 6)
+        next_turn(info['room_id'], advance=True)  # always advance if no moves
 
 
 @socketio.on('move_token')
