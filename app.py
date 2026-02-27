@@ -34,6 +34,7 @@ PATH = [
 ]
 
 # Each color's 6-cell home stretch (the colored corridor to center)
+# Index 0 is the entry point, Index 5 is the goal
 HOME_STRETCH = {
     'red':    [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
     'blue':   [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],
@@ -52,7 +53,7 @@ START_IDX = {
 # The PATH index just BEFORE entering the home stretch
 # After reaching this cell, next move enters home_stretch[0]
 ENTRY_BEFORE_HOME = {
-    'red':    51,   # PATH[51] = [6,0], then home stretch starts
+    'red':    51,   # PATH[51] = [6,0]
     'blue':   11,   # PATH[11] = [0,7]
     'green':  37,   # PATH[37] = [14,7]
     'yellow': 24,   # PATH[24] = [7,14]
@@ -91,31 +92,42 @@ def make_player(color, is_cpu):
 # CORE LOGIC: can a token move with this dice?
 # ─────────────────────────────────────────────
 def can_move(token, dice, color):
-    # RULE: only dice=6 allows moving any token
-    if dice != 6:
-        return False
     if token['finished']:
         return False
 
-    # Token at home base: 6 brings it out
+    # 1. Token at home base: Need a 6 to come out
     if token['pos'] == -1:
-        return True
+        return dice == 6
 
-    # Token in home stretch: move 6 steps, can't overshoot position 5
+    # 2. Token in home stretch: Move if it doesn't overshoot goal (index 5)
     if token['stretch'] >= 0:
-        new_stretch = token['stretch'] + dice
-        return new_stretch <= 5
+        return (token['stretch'] + dice) <= 5
 
-    # Token on outer path: move 6 steps
-    # Check it won't overshoot home stretch
-    entry = ENTRY_BEFORE_HOME[color]
-    steps_to_entry = (entry - token['pos']) % 52
+    # 3. Token on outer path
+    # Calculate distance to the entry point of home stretch
+    entry_idx = ENTRY_BEFORE_HOME[color]
+    steps_to_entry = (entry_idx - token['pos']) % 52
+    
+    # If we are exactly at the entry point, distance is effectively 0, 
+    # meaning the next step must be into the home stretch
     if steps_to_entry == 0:
-        steps_to_entry = 52
-    if dice <= steps_to_entry:
+        steps_to_entry = 52 
+
+    # Case A: Move stays on the outer path
+    if dice < steps_to_entry:
         return True
-    steps_into_stretch = dice - steps_to_entry - 1
-    return steps_into_stretch <= 5
+
+    # Case B: Move lands exactly on the entry point
+    if dice == steps_to_entry:
+        return True
+
+    # Case C: Move enters the home stretch
+    # Calculate how many steps overflow into the stretch
+    # e.g. 2 steps to entry, roll 4 -> 2 steps into stretch -> index 1
+    excess = dice - steps_to_entry
+    stretch_index = excess - 1
+    
+    return stretch_index <= 5
 
 
 # ─────────────────────────────────────────────
@@ -130,7 +142,6 @@ def apply_move(game, player_idx, token_idx):
 
     # ── Case 1: Token at home base → bring it out ──
     if token['pos'] == -1:
-        # Must have rolled 6 (already validated in can_move)
         token['pos'] = START_IDX[color]
         token['stretch'] = -1
         cap = check_capture(game, player_idx, token)
@@ -138,39 +149,44 @@ def apply_move(game, player_idx, token_idx):
             events.append({'type': 'capture', 'by': color, 'victim': cap})
         return events
 
-    # ── Case 2: Token already in home stretch ──
+    # ── Case 2: Token in home stretch ──
     if token['stretch'] >= 0:
-        new_stretch = token['stretch'] + dice
-        if new_stretch == 5:
-            # Reached center exactly
-            token['stretch'] = 5
+        token['stretch'] += dice
+        if token['stretch'] == 5:
             token['finished'] = True
             player['finished_count'] += 1
             events.append({'type': 'home', 'color': color})
             if player['finished_count'] == 4:
                 events.append({'type': 'win', 'color': color})
-        elif new_stretch < 5:
-            token['stretch'] = new_stretch
-        # new_stretch > 5 is blocked by can_move, should never happen
         return events
 
     # ── Case 3: Token on outer path ──
-    entry = ENTRY_BEFORE_HOME[color]
-    steps_to_entry = (entry - token['pos']) % 52
+    entry_idx = ENTRY_BEFORE_HOME[color]
+    steps_to_entry = (entry_idx - token['pos']) % 52
+    
     if steps_to_entry == 0:
         steps_to_entry = 52
 
-    if dice <= steps_to_entry:
+    if dice < steps_to_entry:
         # Move on outer path
         token['pos'] = (token['pos'] + dice) % 52
         cap = check_capture(game, player_idx, token)
         if cap:
             events.append({'type': 'capture', 'by': color, 'victim': cap})
+            
+    elif dice == steps_to_entry:
+        # Land exactly on entry square
+        token['pos'] = entry_idx
+        cap = check_capture(game, player_idx, token)
+        if cap:
+            events.append({'type': 'capture', 'by': color, 'victim': cap})
+            
     else:
         # Enter home stretch
-        steps_into_stretch = dice - steps_to_entry - 1
-        token['pos'] = -2  # mark as "in stretch" (not on outer path)
-        token['stretch'] = steps_into_stretch
+        excess = dice - steps_to_entry
+        token['pos'] = -2  # Mark as off main path
+        token['stretch'] = excess - 1
+        
         if token['stretch'] == 5:
             token['finished'] = True
             player['finished_count'] += 1
@@ -184,16 +200,20 @@ def apply_move(game, player_idx, token_idx):
 def check_capture(game, attacker_idx, token):
     """If attacker's token lands on an enemy token, send it home."""
     pos = token['pos']
+    
     # Only capture on outer path
     if pos < 0 or token['stretch'] >= 0:
         return None
+        
     # No capture on safe squares
     if pos in SAFE_SQUARES:
         return None
+        
     for i, p in enumerate(game['players']):
         if i == attacker_idx:
             continue
         for t in p['tokens']:
+            # Check if enemy is on the same square, on the path, and not finished
             if t['pos'] == pos and t['stretch'] < 0 and not t['finished']:
                 # Send it back home
                 t['pos'] = -1
@@ -210,40 +230,54 @@ def cpu_choose_token(game, player_idx):
     color   = player['color']
     dice    = game['dice_value']
     movable = [t for t in player['tokens'] if can_move(t, dice, color)]
+    
     if not movable:
         return None
 
-    # Priority 1: capture an enemy
+    # Priority 1: Capture an enemy
+    # Simulate moves to find captures
     for t in movable:
         if t['pos'] >= 0 and t['stretch'] < 0:
+            # Calculate potential new position on path
             entry = ENTRY_BEFORE_HOME[color]
-            steps = (entry - t['pos']) % 52 or 52
-            if dice <= steps:
-                new_pos = (t['pos'] + dice) % 52
-                if new_pos not in SAFE_SQUARES:
-                    for p2 in game['players']:
-                        if p2['color'] == color: continue
-                        if any(ot['pos'] == new_pos and ot['stretch'] < 0 and not ot['finished'] for ot in p2['tokens']):
-                            return t['id']
+            steps_to_entry = (entry - t['pos']) % 52
+            if steps_to_entry == 0: steps_to_entry = 52
+            
+            potential_pos = -1
+            
+            if dice < steps_to_entry:
+                potential_pos = (t['pos'] + dice) % 52
+            elif dice == steps_to_entry:
+                potential_pos = entry
+            
+            if potential_pos != -1 and potential_pos not in SAFE_SQUARES:
+                # Check for enemies
+                for p2 in game['players']:
+                    if p2['color'] == color: continue
+                    if any(ot['pos'] == potential_pos and ot['stretch'] < 0 and not ot['finished'] for ot in p2['tokens']):
+                        return t['id']
 
-    # Priority 2: bring token out on 6
+    # Priority 2: Bring token out on 6
     if dice == 6:
         for t in movable:
             if t['pos'] == -1:
                 return t['id']
 
-    # Priority 3: advance the token closest to home
-    on_board = [t for t in movable if t['pos'] >= 0 or t['stretch'] >= 0]
-    if on_board:
-        # Pick the one furthest along
-        def progress(t):
-            if t['stretch'] >= 0:
-                return 1000 + t['stretch']
-            color_start = START_IDX[color]
-            return (t['pos'] - color_start) % 52
-        return max(on_board, key=progress)['id']
+    # Priority 3: Move token closest to winning (highest progress)
+    # Sort by: finished > in stretch > on path (dist to home) > in base
+    def progress_score(tok):
+        if tok['finished']: return 1000
+        if tok['stretch'] >= 0: return 500 + tok['stretch']
+        if tok['pos'] >= 0:
+            # Calculate distance traveled
+            start = START_IDX[color]
+            dist = (tok['pos'] - start) % 52
+            return 100 + dist
+        return 0 # In base
 
-    return movable[0]['id']
+    # Move the one with highest progress that is movable
+    best_token = max(movable, key=progress_score)
+    return best_token['id']
 
 
 # ─────────────────────────────────────────────
@@ -325,11 +359,9 @@ def start_cpu_turn(room_id, delay=1.2):
         movable = [t for t in cp['tokens'] if can_move(t, val, color)]
 
         if not movable:
-            socketio.emit('notification',
-                {'msg': f"{color.upper()} rolled {val} — needs 6 to move!"},
-                room=room_id)
-            time.sleep(1.0)
-            next_turn(room_id, advance=True)  # always advance if no moves
+            # Only show notification if it's a 6 (usually expected) or if completely blocked
+            # For smoother gameplay, we just pass turn
+            next_turn(room_id, advance=True)
             return
 
         time.sleep(0.8)
@@ -345,6 +377,7 @@ def start_cpu_turn(room_id, delay=1.2):
 
         broadcast(room_id, events)
         time.sleep(0.5)
+        # Rule: If rolled 6, roll again. Else pass turn.
         next_turn(room_id, advance=val != 6)
 
     threading.Thread(target=run, daemon=True).start()
@@ -460,11 +493,10 @@ def on_roll_dice(data):
     broadcast(info['room_id'])
 
     if not movable:
-        socketio.emit('notification',
-            {'msg': f"Rolled {val} — need a 6 to move! Next player..."},
-            room=info['room_id'])
+        # No moves possible (e.g. need 6 to open but rolled 3)
+        # Pass turn immediately
         time.sleep(0.8)
-        next_turn(info['room_id'], advance=True)  # always advance if no moves
+        next_turn(info['room_id'], advance=True)
 
 
 @socketio.on('move_token')
@@ -493,6 +525,9 @@ def on_move_token(data):
         return
 
     broadcast(info['room_id'], events)
+    
+    # If rolled a 6, player gets another turn (advance=False)
+    # Otherwise, turn passes to next player (advance=True)
     next_turn(info['room_id'], advance=game['dice_value'] != 6)
 
 
