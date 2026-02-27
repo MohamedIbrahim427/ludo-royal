@@ -33,22 +33,16 @@ HOME_STRETCH = {
     'yellow': [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
 }
 
-# Where each color enters the board from home base
 START_IDX = {'red': 0, 'blue': 13, 'green': 26, 'yellow': 39}
-
-# The path index of the last outer cell before home stretch
 ENTRY_BEFORE_HOME = {'red': 51, 'blue': 11, 'green': 37, 'yellow': 24}
-
-# Safe squares — tokens here cannot be captured
-# Includes: colored start squares (0,13,26,39) and star squares (8,21,34,47)
 SAFE_SQUARES = {0, 8, 13, 21, 26, 34, 39, 47}
 
 # ─────────────────────────────────────────────
 # TOKEN STATE
-# pos == -1       → at home base (not on board)
-# pos == 0..51    → on outer PATH at this index
+# pos == -1 → at home base (not on board)
+# pos == 0..51 → on outer PATH at this index
 # stretch == 0..5 → inside home stretch
-# finished        → reached center
+# finished → reached center
 # ─────────────────────────────────────────────
 
 def make_token(idx):
@@ -61,6 +55,7 @@ def make_player(color, is_cpu):
         'tokens': [make_token(i) for i in range(4)],
         'finished_count': 0,
         'sid': None,
+        'last_moved_token': None,          # track for triple-six penalty
     }
 
 # ─────────────────────────────────────────────
@@ -78,23 +73,19 @@ def can_move(token, dice, color):
     if token['stretch'] >= 0:
         return token['stretch'] + dice <= 5
 
-    # Token on outer path — always can move UNLESS it would overshoot home stretch
+    # Token on outer path — check if it can move without overshooting home stretch
     entry = ENTRY_BEFORE_HOME[color]
-    steps_to_entry = (entry - token['pos']) % 52
-    if steps_to_entry == 0:
-        steps_to_entry = 52
+    steps_to_entry = (entry - token['pos']) % 52   # distance to entry square (0 if already there)
 
     if dice <= steps_to_entry:
-        return True  # stays on outer path or lands on entry cell
+        return True   # stays on outer path or lands exactly on entry square
 
-    # Would enter home stretch — check no overshoot
+    # Would enter home stretch — check overshoot
     steps_into_stretch = dice - steps_to_entry - 1
     return steps_into_stretch <= 5
 
-
 # ─────────────────────────────────────────────
-# RULE 6: blocking — two same-color tokens on same square
-# block opponents from passing or landing
+# RULE 6: blocking — two same-color tokens on same square block opponents
 # ─────────────────────────────────────────────
 def is_blocked(game, attacker_idx, new_pos):
     """Returns True if new_pos is blocked by 2+ enemy tokens."""
@@ -109,7 +100,6 @@ def is_blocked(game, attacker_idx, new_pos):
             return True
     return False
 
-
 # ─────────────────────────────────────────────
 # APPLY A MOVE — returns list of events
 # ─────────────────────────────────────────────
@@ -119,6 +109,9 @@ def apply_move(game, player_idx, token_idx):
     color  = player['color']
     dice   = game['dice_value']
     events = []
+
+    # Record that this token was moved (for triple-six penalty)
+    player['last_moved_token'] = token_idx
 
     # ── Case 1: bring token out of home base (Rule 3) ──
     if token['pos'] == -1:
@@ -153,8 +146,6 @@ def apply_move(game, player_idx, token_idx):
     # ── Case 3: move on outer path ──
     entry = ENTRY_BEFORE_HOME[color]
     steps_to_entry = (entry - token['pos']) % 52
-    if steps_to_entry == 0:
-        steps_to_entry = 52
 
     if dice <= steps_to_entry:
         # Stays on outer path
@@ -181,7 +172,6 @@ def apply_move(game, player_idx, token_idx):
 
     return events
 
-
 # ─────────────────────────────────────────────
 # RULE 5: capture
 # ─────────────────────────────────────────────
@@ -206,9 +196,8 @@ def check_capture(game, attacker_idx, token):
                     return p['color']
     return None
 
-
 # ─────────────────────────────────────────────
-# RULE 8: triple-6 rule
+# RULE 8: triple-6 rule (streak tracking)
 # ─────────────────────────────────────────────
 def check_triple_six(game, player_idx):
     """Returns True if this player just rolled their 3rd consecutive 6."""
@@ -220,7 +209,6 @@ def check_triple_six(game, player_idx):
         history[player_idx] = 0
     game['six_streak'] = history
     return history.get(player_idx, 0) >= 3
-
 
 # ─────────────────────────────────────────────
 # CPU AI
@@ -241,7 +229,7 @@ def cpu_choose_token(game, player_idx):
     for t in movable:
         if t['pos'] >= 0 and t['stretch'] < 0:
             entry = ENTRY_BEFORE_HOME[color]
-            steps = (entry - t['pos']) % 52 or 52
+            steps = (entry - t['pos']) % 52
             if dice <= steps:
                 new_pos = (t['pos'] + dice) % 52
                 if new_pos not in SAFE_SQUARES:
@@ -268,7 +256,6 @@ def cpu_choose_token(game, player_idx):
 
     return movable[0]['id']
 
-
 def _would_block(game, player_idx, token, dice):
     """Check if the move result would be blocked by enemies."""
     color = game['players'][player_idx]['color']
@@ -278,12 +265,11 @@ def _would_block(game, player_idx, token, dice):
     if token['stretch'] >= 0:
         return False
     entry = ENTRY_BEFORE_HOME[color]
-    steps = (entry - token['pos']) % 52 or 52
+    steps = (entry - token['pos']) % 52
     if dice <= steps:
         new_pos = (token['pos'] + dice) % 52
         return is_blocked(game, player_idx, new_pos)
     return False
-
 
 # ─────────────────────────────────────────────
 # ROOM MANAGEMENT
@@ -291,7 +277,6 @@ def _would_block(game, player_idx, token, dice):
 rooms    = {}
 players  = {}
 mm_queue = []
-
 
 def create_room(mode):
     room_id   = str(uuid.uuid4())[:8].upper()
@@ -320,7 +305,6 @@ def create_room(mode):
     rooms[room_id] = game
     return room_id
 
-
 def game_to_client(game, events=None):
     payload = {
         'room_id':        game['room_id'],
@@ -340,12 +324,10 @@ def game_to_client(game, events=None):
         payload['events'] = events
     return payload
 
-
 def broadcast(room_id, events=None):
     game = rooms.get(room_id)
     if game:
         socketio.emit('game_state', game_to_client(game, events), room=room_id)
-
 
 # ─────────────────────────────────────────────
 # TURN MANAGEMENT
@@ -356,20 +338,22 @@ def next_turn(room_id, rolled_six=False):
         return
     game['rolled'] = False
 
-    # Rule 8: triple six → lose turn, send last token back
+    # Rule 8: triple six → lose turn, send last moved token back
     if check_triple_six(game, game['current_player']):
         cp = game['players'][game['current_player']]
-        # Send last moved token back if any are on board
-        for t in reversed(cp['tokens']):
-            if t['pos'] >= 0:
-                t['pos'] = -1
-                t['stretch'] = -1
-                break
+        # Send the last moved token back (if any)
+        last_idx = cp.get('last_moved_token')
+        if last_idx is not None:
+            last_token = cp['tokens'][last_idx]
+            if last_token['pos'] >= 0 or last_token['stretch'] >= 0:
+                last_token['pos'] = -1
+                last_token['stretch'] = -1
+                # If the token was in home stretch and not finished, it's now back at start
         socketio.emit('notification',
             {'msg': f"3 sixes in a row! {cp['color'].upper()} loses their turn!"},
             room=room_id)
         game['six_streak'][game['current_player']] = 0
-        rolled_six = False  # force advance
+        rolled_six = False  # force advance (no extra turn despite rolling six)
 
     # Rule 8: rolled 6 → extra turn (same player)
     if rolled_six:
@@ -391,7 +375,6 @@ def next_turn(room_id, rolled_six=False):
     if cp['is_cpu']:
         start_cpu_turn(room_id)
 
-
 def start_cpu_turn(room_id, delay=1.2):
     def run():
         time.sleep(delay)
@@ -412,12 +395,12 @@ def start_cpu_turn(room_id, delay=1.2):
         movable = [t for t in cp['tokens'] if can_move(t, val, color)]
 
         if not movable:
-            # Rule 9: no tokens on board + didn't roll 6 → pass
+            # Even if no moves, a 6 still grants an extra turn
             socketio.emit('notification',
-                {'msg': f"{color.upper()} rolled {val} — no moves, next player!"},
+                {'msg': f"{color.upper()} rolled {val} — no moves!"},
                 room=room_id)
             time.sleep(1.0)
-            next_turn(room_id, rolled_six=False)
+            next_turn(room_id, rolled_six=(val == 6))
             return
 
         time.sleep(0.7)
@@ -427,7 +410,7 @@ def start_cpu_turn(room_id, delay=1.2):
                 {'msg': f"{color.upper()} has no valid moves!"},
                 room=room_id)
             time.sleep(0.8)
-            next_turn(room_id, rolled_six=False)
+            next_turn(room_id, rolled_six=(val == 6))
             return
 
         events = apply_move(game, game['current_player'], tok_id)
@@ -444,7 +427,6 @@ def start_cpu_turn(room_id, delay=1.2):
 
     threading.Thread(target=run, daemon=True).start()
 
-
 # ─────────────────────────────────────────────
 # SOCKET EVENTS
 # ─────────────────────────────────────────────
@@ -452,7 +434,6 @@ def start_cpu_turn(room_id, delay=1.2):
 @socketio.on('connect')
 def on_connect():
     print(f"[+] {request.sid}")
-
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -466,9 +447,13 @@ def on_disconnect():
             pidx = info['player_idx']
             game['players'][pidx]['sid']    = None
             game['players'][pidx]['is_cpu'] = True
+            # If it was this player's turn and game is active, start CPU turn
+            if game['started'] and not game['game_over'] and game['current_player'] == pidx:
+                # If they had already rolled, reset rolled flag so CPU can roll anew
+                game['rolled'] = False
+                start_cpu_turn(info['room_id'], delay=1.0)
             broadcast(info['room_id'])
     print(f"[-] {sid}")
-
 
 @socketio.on('create_room')
 def on_create_room(data):
@@ -491,7 +476,6 @@ def on_create_room(data):
             start_cpu_turn(room_id)
     else:
         broadcast(room_id)
-
 
 @socketio.on('join_room')
 def on_join_room(data):
@@ -520,7 +504,6 @@ def on_join_room(data):
         if cp['is_cpu']:
             start_cpu_turn(room_id)
 
-
 @socketio.on('roll_dice')
 def on_roll_dice(data):
     info = players.get(request.sid)
@@ -541,13 +524,12 @@ def on_roll_dice(data):
 
     broadcast(info['room_id'])
 
-    # Rule 9: no tokens on board, didn't roll 6 → pass turn
+    # Rule 9: if no moves, still grant extra turn if rolled a 6
     if not movable:
         msg = f"Rolled {val} — need a 6 to move!" if val != 6 else f"Rolled 6 but all blocked!"
         socketio.emit('notification', {'msg': msg}, room=info['room_id'])
         time.sleep(0.6)
-        next_turn(info['room_id'], rolled_six=False)
-
+        next_turn(info['room_id'], rolled_six=(val == 6))
 
 @socketio.on('move_token')
 def on_move_token(data):
@@ -577,10 +559,8 @@ def on_move_token(data):
 
     broadcast(info['room_id'], events)
 
-    # Rule 8: rolled 6 → extra turn
-    # Rule 5 variation: some give extra turn on capture too (not applied here)
+    # Rule 8: rolled 6 → extra turn (even if move was invalid? but we already moved)
     next_turn(info['room_id'], rolled_six=(dice_val == 6))
-
 
 @socketio.on('quick_join')
 def on_quick_join(data):
@@ -606,13 +586,11 @@ def on_quick_join(data):
         game['started'] = True
         broadcast(room_id)
 
-
 @socketio.on('cancel_matchmaking')
 def on_cancel_matchmaking(data):
     sid = request.sid
     if sid in mm_queue:
         mm_queue.remove(sid)
-
 
 # ─────────────────────────────────────────────
 # ROUTES
