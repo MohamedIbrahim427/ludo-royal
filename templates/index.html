@@ -551,23 +551,27 @@ function renderTokens(state){
   });
 }
 
-function canMove(tok,dice,color){
-  // RULE: only dice=6 allows moving any token
-  if(dice!==6) return false;
-  if(tok.finished) return false;
-  // At home base: 6 brings it out
-  if(tok.pos===-1) return true;
+function canMove(tok, dice, color) {
+  if (tok.finished) return false;
+  
+  // At home base: need a 6 to bring out
+  if (tok.pos === -1) return dice === 6;
+  
   // In home stretch: cannot overshoot position 5
-  if(tok.stretch>=0) return tok.stretch+dice<=5;
-  // On outer path: check won't overshoot home stretch
-  const entry=HE[color];
-  let stepsToEntry=(entry-tok.pos+52)%52;
-  if(stepsToEntry===0) stepsToEntry=52;
-  if(dice<=stepsToEntry) return true;
-  const stepsInto=dice-stepsToEntry-1;
-  return stepsInto<=5;
+  if (tok.stretch >= 0) return tok.stretch + dice <= 5;
+  
+  // On outer path: calculate distance to the entry square of home stretch
+  const entry = HE[color];               // index of the entry square (51,11,37,24)
+  let stepsToEntry = (entry - tok.pos + 52) % 52; // 0 if already on entry
+  
+  // If dice is small enough to stay on the outer path
+  if (dice <= stepsToEntry) return true;
+  
+  // Otherwise we will enter the home stretch – check overshoot
+  const stepsIntoStretch = dice - stepsToEntry - 1;
+  return stepsIntoStretch <= 5;
 }
-
+  
 function doWin(state){
   document.getElementById('winner-name').innerHTML=`<span style="color:${CHX[state.winner]}">${state.winner.charAt(0).toUpperCase()+state.winner.slice(1)}</span>`;
   showScreen('win-screen');
