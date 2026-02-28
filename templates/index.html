@@ -355,7 +355,7 @@ const HP={
   green: [[11,1],[11,3],[13,1],[13,3]],
   yellow:[[11,11],[11,13],[13,11],[13,13]],
 };
-const HE={red:51,blue:11,green:37,yellow:24};
+const HE={red:50, blue:11, green:37, yellow:24};
 const SAFE=new Set([0,8,13,21,26,34,39,47]);
 const DOTS={
   1:[0,0,0,0,1,0,0,0,0],2:[1,0,0,0,0,0,0,0,1],3:[1,0,0,0,1,0,0,0,1],
@@ -446,15 +446,15 @@ function buildBoard(){
   mkCircle(cells,11,11,'yellow');mkCircle(cells,11,13,'yellow');mkCircle(cells,13,11,'yellow');mkCircle(cells,13,13,'yellow');
 
   // ── Path ──
-  PATH.forEach(([r,c],i)=>{
+PATH.forEach(([r,c],i)=>{
     if(SAFE.has(i)){
       if(i===0)  cells[r][c].className='c p-r';
       else if(i===13) cells[r][c].className='c p-b';
-      else if(i===26) cells[r][c].className='c p-y';   // ← changed from p-g to p-y
-      else if(i===39) cells[r][c].className='c p-g';   // ← changed from p-y to p-g
+      else if(i===26) cells[r][c].className='c p-g';   // was p-y, now green
+      else if(i===39) cells[r][c].className='c p-y';   // was p-g, now yellow
       else cells[r][c].className='c p-safe';
     } else cells[r][c].className='c p-w';
-  });
+});
 
   // ── Home stretches ──
   HS.red.forEach(([r,c])=>cells[r][c].className='c p-r');
