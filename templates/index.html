@@ -450,8 +450,8 @@ function buildBoard(){
     if(SAFE.has(i)){
       if(i===0)  cells[r][c].className='c p-r';
       else if(i===13) cells[r][c].className='c p-b';
-      else if(i===26) cells[r][c].className='c p-g';
-      else if(i===39) cells[r][c].className='c p-y';
+      else if(i===26) cells[r][c].className='c p-y';   // ← changed from p-g to p-y
+      else if(i===39) cells[r][c].className='c p-g';   // ← changed from p-y to p-g
       else cells[r][c].className='c p-safe';
     } else cells[r][c].className='c p-w';
   });
