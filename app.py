@@ -33,7 +33,7 @@ HOME_STRETCH = {
     'yellow': [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
 }
 
-START_IDX = {'red': 0, 'blue': 13, 'green': 26, 'yellow': 39}
+START_IDX = {'red': 0, 'blue': 13, 'yellow': 26, 'green': 39}
 ENTRY_BEFORE_HOME = {'red': 51, 'blue': 11, 'green': 37, 'yellow': 24}
 SAFE_SQUARES = {0, 8, 13, 21, 26, 34, 39, 47}
 
